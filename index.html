@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Extractor from Image</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      width: 80%;
+      max-width: 800px;
+      height: 200px;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+
+    #progress {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Text Extractor from Image</h1>
+
+  <input type="file" id="image-input" accept="image/*" />
+  
+  <div id="result"></div>
+
+  <div id="progress"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/2.1.4/tesseract.min.js"></script>
+  <script>
+    const imageInput = document.getElementById('image-input');
+    const resultContainer = document.getElementById('result');
+    const progressContainer = document.getElementById('progress');
+
+    imageInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        resultContainer.textContent = 'Processing... Please wait.';
+        progressContainer.textContent = '';
+        
+        Tesseract.recognize(
+          file,
+          'eng',
+          {
+            logger: (m) => {
+              progressContainer.textContent = `Progress: ${m.status} - ${Math.round(m.progress * 100)}%`;
+            }
+          }
+        ).then(({ data: { text } }) => {
+          resultContainer.textContent = text || 'No text found in the image.';
+        }).catch((err) => {
+          resultContainer.textContent = 'Error extracting text: ' + err.message;
+        });
+      } else {
+        resultContainer.textContent = 'No image selected.';
+      }
+    });
+  </script>
+
+</body>
+</html>
